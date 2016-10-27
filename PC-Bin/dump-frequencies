@@ -1,0 +1,9 @@
+#!/bin/sh
+
+(while [ -n "$1" ]; do
+	dump-bytes "$1"
+	shift
+done)                   |\
+sort                    |\
+uniq -c                 |\
+sort -nk1

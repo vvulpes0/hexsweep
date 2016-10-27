@@ -1,0 +1,14 @@
+track { halt }
+track { halt }
+track { halt }
+track
+{
+	length 0x08
+	label loop
+	repeat 3
+	{
+		A-2 E-3 E-3 G-2 D-3 G-2 C-3 B-2
+	}
+	A-2 E-3 D-3 E-3 F-3 E-3 D-3 C-3
+	goto loop
+}

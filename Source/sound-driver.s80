@@ -1,0 +1,400 @@
+	.equ LOCATION_COUNTER,     0
+	.equ REPEAT_LOCATION,      2
+	.equ REPEAT_COUNT,         4
+	.equ DELAY_COUNT,          5
+	.equ CURRENT_DELAY_COUNT,  6
+	.equ SHOULD_PLAY,          7
+	.equ SUSTAIN,              8
+	.equ ATTACK,               9
+
+	.macro wait_ym2612
+#9:	bit  7, (ix+1)
+#	jr   nz, 9b
+	.endm
+
+	.macro address register
+	wait_ym2612
+	ld (ix + 0), \register
+	.endm
+
+	.macro rewrite value
+	wait_ym2612
+	ld (ix+1), \value
+	.endm
+
+	.macro write register, value
+	address \register
+	rewrite \value
+	.endm
+
+	.text
+	.org 0
+	.global driver_start
+driver_start:
+	di
+	im       1
+	ld       sp, __stack
+	ld       ix, 0x4000
+	xor      a
+	write    0x22, a
+	write    0x27, a
+	write    0x26, 0x98
+	write    0x2b, a
+	ei
+	call     pause
+
+	.org 0x38
+	ei
+	reti
+
+pause:
+	ld       ix, 0x4000
+	write    0x28, 0x0
+	rewrite  0x1
+	rewrite  0x2
+	rewrite  0x4
+	rewrite  0x5
+	rewrite  0x6
+
+1:	halt
+	ld       a, (command)
+	and      a
+	jr       z, 1b
+
+	cp       0xc0               ;| 0xc0: Restart
+	jr       nz, 2f
+	call     set_starting_locations
+	ld       a, 1
+	ld       (array_1 + CURRENT_DELAY_COUNT), a
+	ld       (array_2 + CURRENT_DELAY_COUNT), a
+	ld       (array_3 + CURRENT_DELAY_COUNT), a
+	ld       (array_4 + CURRENT_DELAY_COUNT), a
+	jr       do_song
+2:	cp       0xc2               ;| 0xc2: Resume
+	jr       z, do_song
+3:	cp       0x05               ;| 0x01-0x04: Load Voice n
+	call     c, load_voice
+	xor      a
+	ld       (command), a
+	jr       pause
+do_song:
+	xor      a
+	ld       (command), a
+	call     continue_song
+	jr       pause
+
+	;| load voice
+load_voice:
+	ld       ix, 0x4000
+	dec      a
+	ld       d, a
+	cp       3
+	jr       c, 1f
+	ld       ix, 0x4002
+	sub      3
+1:	ld       hl, voice_data
+	add      a, 0xb4
+	write    a, 0xc0
+	sub      4
+	ld       b, 0x18
+	ld       c, (hl)
+	write    a, c
+	sub      0x80
+1:	inc      hl
+	ld       c, (hl)
+	write    a, c
+	add      a, 4
+	djnz     1b
+	ret
+
+continue_song:
+	;| If a command has been issued, handle it.
+	ld       a, (command)
+	and      a
+	ret      nz
+
+	ld       ix, 0x4000
+	;| Wait for tick
+	write    0x27, 0x2a
+1:	bit      1, (ix + 0)
+	jr       z, 1b
+
+	;| Process commands through next note
+	ld       de, array_1
+	push     de
+	ld       de, array_2
+	push     de
+	ld       de, array_3
+	push     de
+	ld       de, array_4
+	push     de
+
+	ld       b, 4
+1:	ld       ix, 0x4000
+	pop      iy
+	ld       d, (iy + LOCATION_COUNTER + 1)
+	ld       e, (iy + LOCATION_COUNTER)
+	dec      (iy + CURRENT_DELAY_COUNT)
+	jr       nz, 5f
+	ld       a, b
+	dec      a
+	bit      0, (iy + SUSTAIN)
+	jr       nz, 3f
+	push     af
+	cp       3
+	jr       c, 2f
+	inc      a
+2:	write    0x28, a
+	pop      af
+3:	cp       3
+	jr       c, 4f
+	ld       ix, 0x4002
+	sub      3
+4:	push     bc
+	call     process_commands
+	pop      bc
+5:	djnz     1b
+
+	;| Do key-on for each channel, if necessary
+	ld       ix, 0x4000
+	ld       de, array_1
+	push     de
+	ld       de, array_2
+	push     de
+	ld       de, array_3
+	push     de
+	ld       de, array_4
+	push     de
+	address  0x28
+
+	ld       b, 4
+1:	pop      iy
+	ld       c, (iy + ATTACK)
+	ld       a, 1
+	sub      (iy + SUSTAIN)
+	ld       (iy + ATTACK), a
+	or       c
+	and      (iy + SHOULD_PLAY)
+	jr       z, 3f
+	ld       a, b
+	dec      a
+	cp       3
+	jr       c, 2f
+	inc      a
+2:	or       0xf0
+	rewrite  a
+3:	djnz     1b
+	jp       continue_song
+
+	;| Process Commands:
+	;| Args: a  - channel number
+	;|       de - contains location counter for current channel
+	;|       ix - is set correctly for calls to write
+	;|       iy - beginning of array for current channel
+process_commands:
+	ex       de, hl              ;| Now hl contains a good loc counter
+	ld       (iy + SHOULD_PLAY), 0
+	ex       af, af'             ;| Shadow a holds channel number
+loop:	inc      hl
+	ld       a, (hl)
+	cp       0x81
+	jr       nc, no_note
+note:
+	ld       (iy + SHOULD_PLAY), 1
+	exx
+	ld       hl, frequencies
+	ld       e, a
+	and      0x0f
+	ld       c, a
+	ld       b, 0
+	add      hl, bc
+	add      hl, bc
+	inc      hl
+	ld       a, e
+	and      0xf0
+	rra
+	or       (hl)
+	ld       b, a
+	ex       af, af'
+	add      a, 0xa4
+	write    a, b
+	dec      hl
+	ld       b, (hl)
+	sub      4
+	write    a, b
+	exx
+	jr       return_from_commands
+no_note:
+delay:
+	cp       0xd0
+	jr       nz, no_delay
+	inc      hl
+	ld       a, (hl)
+	ld       (iy + DELAY_COUNT), a
+	jr       loop
+no_delay:
+loopset:
+	cp       0xf0
+	jr       c, no_loopset
+	ld       (iy + REPEAT_LOCATION + 1), h
+	ld       (iy + REPEAT_LOCATION), l
+	and      0x0f
+	ld       (iy + REPEAT_COUNT), a
+	jr       loop
+no_loopset:
+loopback:
+	cp       0xe0
+	jr       nz, no_loopback
+	dec      (iy + REPEAT_COUNT)
+	jr       z, loop
+	ld       h, (iy + REPEAT_LOCATION + 1)
+	ld       l, (iy + REPEAT_LOCATION)
+2:	jr       loop
+no_loopback:
+offset:
+	cp       0xe1
+	jr       nz, no_offset
+	inc      hl
+	;|| hl = hl + displacement - 253
+	ld       b, 0
+	ld       c, (hl)
+	add      hl, bc
+	ld       b, 0xff
+	ld       c, 0x03
+	add      hl, bc
+	jr       loop
+no_offset:
+halt:
+	cp       0xe2
+	jr       nz, no_halt
+	dec      hl
+	jr       return_from_commands
+no_halt:
+sustain:
+	cp       0xef
+	jr       nz, loop
+	ld       a, 1
+	ld       (iy + ATTACK), a
+	sub      (iy + SUSTAIN)
+	ld       (iy + SUSTAIN), a
+	jr       2b
+
+return_from_commands:
+	ld       a, (iy + DELAY_COUNT)
+	ld       (iy + CURRENT_DELAY_COUNT), a
+	ld       (iy + LOCATION_COUNTER + 1), h
+	ld       (iy + LOCATION_COUNTER), l
+	ret
+
+set_starting_locations:
+	ld       hl, song_data
+	ld       de, array_4
+	push     de
+	ld       de, array_3
+	push     de
+	ld       de, array_2
+	push     de
+	ld       de, array_1
+	push     de
+
+	ld       b, 4
+1:	pop      iy
+	ld       d, (hl)
+	inc      hl
+	ld       e, (hl)
+	inc      hl
+	push     hl
+	ld       hl, song_data - 1
+	add      hl, de
+	ld       (iy + LOCATION_COUNTER + 1), h
+	ld       (iy + LOCATION_COUNTER), l
+	pop      hl
+	djnz     1b
+
+	ret
+
+	.section .rodata, "rd"
+frequencies:
+	.word   644,  682,  723,  766,  811,  860
+	.word   911,  965, 1022, 1083, 1147, 1216
+
+	.bss
+array_1:
+# location_counter
+	.word  0x0000
+# rep_loc
+	.word  0x0000
+# rep_count
+	.byte  0x00
+# delay_count
+	.byte  0x00
+# current_delay_count
+	.byte  0x00
+# should_play
+	.byte  0x00
+# sustain
+	.byte  0x00
+# attack
+	.byte  0x00
+
+array_2:
+# location_counter
+	.word  0x0000
+# rep_loc
+	.word  0x0000
+# rep_count
+	.byte  0x00
+# delay_count
+	.byte  0x00
+# current_delay_count
+	.byte  0x00
+# should_play
+	.byte  0x00
+# sustain
+	.byte  0x00
+# attack
+	.byte  0x00
+
+array_3:
+# location_counter
+	.word  0x0000
+# rep_loc
+	.word  0x0000
+# rep_count
+	.byte  0x00
+# delay_count
+	.byte  0x00
+# current_delay_count
+	.byte  0x00
+# should_play
+	.byte  0x00
+# sustain
+	.byte  0x00
+# attack
+	.byte  0x00
+
+array_4:
+# location_counter
+	.word  0x0000
+# rep_loc
+	.word  0x0000
+# rep_count
+	.byte  0x00
+# delay_count
+	.byte  0x00
+# current_delay_count
+	.byte  0x00
+# should_play
+	.byte  0x00
+# sustain
+	.byte  0x00
+# attack
+	.byte  0x00
+
+command:
+	.byte 0x00
+voice_data:
+	.rept 0x19
+	.byte 0x00
+	.endr
+song_data:
