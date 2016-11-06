@@ -32,9 +32,9 @@ skip_tmss:
 	dbra    %d1, 1b
 
 	|| Copy initialized variables to RAM
-	lea     (__text_end), %a0       | initialized data is between sections
-	lea     (__data_start), %a1     | first RAM location
-	move.l  #__data_size, %d0       | bytes to copy
+	lea     (__copy_source), %a0
+	lea     (__copy_dest), %a1
+	move.l  #__copy_size, %d0       | bytes to copy
 	lsr.l   #1, %d0                 |  shift to get words
 	subq.w  #1, %d0                 |  subtract one for loop counter
 1:	move.w  (%a0)+, (%a1)+          | copy word to RAM

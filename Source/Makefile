@@ -17,7 +17,7 @@ CFLAGS:= -ansi -pedantic -Wall -Wconversion -Wextra -Werror\
  -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(FDEBUG) -DSMALL_ARRAY -Wa,-l\
  -I./Include -I/opt/toolchains/m68k/m68k-elf/include\
  -ffreestanding -Os -pipe\
- -mcpu=68000 -march=68000 -mtune=68000 -m68000\
+ -mcpu=68000 -march=68000 -mtune=68000 -m68000 -mpcrel -fpie\
  -fomit-frame-pointer -fira-region=all -fweb\
  -Wa,--no-pad-sections -flto -ffat-lto-objects
 LDFLAGS:= $(CFLAGS)\

@@ -55,11 +55,23 @@ ASSERT(SIZE <= LENGTH(rom), "Error: requested object too large");
 
 SECTIONS
 {
-  .text 0x00000000 :
+  . = 0x00000000;
+  .header :
+  SUBALIGN(2)
+  {
+    KEEP(rom-header.o(.rodata))
+  } > rom AT> rom :text =0x20
+  .startup :
+  SUBALIGN(2)
+  {
+    KEEP(crt0.o(.text))
+  } > rom AT> rom :text =0xff
+  __copy_source = .;
+  __copy_dest = ORIGIN(ram);
+  .text :
   SUBALIGN(2)
   {
     __text_start = .;
-    KEEP(rom-header.o(.rodata))
     *(SORT_BY_ALIGNMENT(.text*))
     *(.gnu.linkonce.t.*)
 
@@ -101,7 +113,7 @@ SECTIONS
     *(.gnu.linkonce.r.*)
     . = ALIGN(16);
     __text_end = .;
-  } > rom AT> rom :text =0xFF
+  } > ram AT> rom :text =0xFF
   __text_size = __text_end - __text_start;
 
   .data :
@@ -119,7 +131,7 @@ SECTIONS
     __data_end = .;
   } > ram AT> rom :data =0xFF
   __data_size = __data_end - __data_start;
-
+  __copy_size = __text_size + __data_size;
   .bss (NOLOAD) :
   {
     __bss_start = .;
