@@ -13,7 +13,8 @@ delay(unsigned int const n)
 	DWord const start = gTicks;
 	while (gTicks - start < n)
 	{
-		/* do nothing */
+		/* wait for interrupt */
+		__asm__ volatile ("trap #0" : );
 	}
 	return;
 }

@@ -15,7 +15,7 @@
 #define BOARD_HEIGHT BOARD_WIDTH
 
 #define MIN(x, y) \
-	((y) ^ (((x) ^ (y)) & (~(BOOL((x) < (y))) + 1U)))
+	((y) ^ (((x) ^ (y)) & (~(0U+BOOL((x) < (y))) + 1U)))
 #define SCORE\
 	((gTicks - start_time) / 60U)
 

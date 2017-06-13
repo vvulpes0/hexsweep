@@ -3,7 +3,7 @@
 	.long   err     , err    , err  , err  , err    , err , err    , err
 	.long   err     , err    , err  , err  , err    , err , err    , err
 	.long   err     , err    , err  , err  , hblank , err , vblank , err
-	.long   err     , err    , err  , err  , err    , err , err    , err
+	.long   trap0   , err    , err  , err  , err    , err , err    , err
 	.long   err     , err    , err  , err  , err    , err , err    , err
 	.long   err     , err    , err  , err  , err    , err , err    , err
 	.long   err     , err    , err  , err  , err    , err , err    , err
@@ -58,6 +58,10 @@ vblank:
 
 2:	addq.l  #1, (gTicks)
 1:	addq.l  #4, %sp
+	rte
+
+trap0:
+	stop #0x2000
 	rte
 
 	.bss

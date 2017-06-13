@@ -7,7 +7,7 @@
 #include "Data/font.h"
 #include "Data/tiles.h"
 #include "Instruments/instruments.h"
-#include "Songs/song.h"
+#include "Songs/playground.h"
 
 #ifdef DEBUG
 extern void (*err_vector)(void);
@@ -49,11 +49,13 @@ main(void)
 	{
 		enable_display(1);
 		load_driver(sound_driver);
+		load_voice(grand_piano);
+		sound_command(LOAD_VOICE_1);
 		load_voice(clarinet);
 		sound_command(LOAD_VOICE_2);
 		load_voice(bassoon);
-		sound_command(LOAD_VOICE_4);
-		load_song(song);
+		sound_command(LOAD_VOICE_3);
+		load_song(playground);
 		sound_command(PLAY);
 		enable_cursor();
 		while(1)

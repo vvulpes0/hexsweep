@@ -35,7 +35,7 @@ OBJS= controls.o crt0.o decompress.o graphics.o \
       rom-header.o security.o sound.o ui.o      \
       Data/font.o Data/compressed-font.o        \
       Data/tiles.o Data/compressed-tiles.o      \
-      Songs/song.o
+      Songs/playground.o
 
 .SUFFIXES :
 .SUFFIXES : .a .c .h .o .o80 .co .s .s80 .bin .weights .huffman .song .osong
@@ -97,7 +97,7 @@ main.o                       : main.c Include/common.h Include/decompress.h \
                                Include/security.h Include/ui.h              \
                                Data/font.h Data/tiles.h                     \
                                Instruments/instruments.h                    \
-                               Songs/song.h
+                               Songs/playground.h
 mines.o                      : mines.c Include/common.h Include/mines.h     \
                                Include/random.h
 random.o                     : random.c Include/common.h Include/random.h
@@ -136,7 +136,7 @@ clean ::
 	Instruments/clarinet.o\
 	Instruments/grand-piano.o\
 	Instruments/libinstruments.a\
-	Songs/song.o Songs/song.h Songs/song.s Songs/song.osong\
+	Songs/playground.o Songs/playground.h Songs/playground.s Songs/playground.osong\
 	controls.o crt0.o decompress.o graphics.o hardware.o\
 	main.o mines.o random.o rom-header.o security.o ui.o\
 	sound.o sound-driver.o80 sound-driver\
