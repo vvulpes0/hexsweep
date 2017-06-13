@@ -1,5 +1,5 @@
 KILOBIT=  64
-SIZE!=    (printf '$(KILOBIT) 128 * p q' | dc)
+SIZE!=    (printf '$(KILOBIT) 128 * p' | dc)
 
 AR=       m68k-elf-ar
 AS=       m68k-elf-as
@@ -78,11 +78,11 @@ OBJS= controls.o crt0.o decompress.o graphics.o \
 
 .MAIN : hexsweep.bin
 
-hexsweep.bin            : $(OBJS) Instruments/libinstruments.a
+hexsweep.bin                 : $(OBJS) Instruments/libinstruments.a
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $(.TARGET) &&\
 	mdchksum -f $(.TARGET)
 
-sound-driver : sound-driver.o80
+sound-driver                 : sound-driver.o80
 	$(Z80LD) $(Z80LDFLAGS) $(.ALLSRC) -o $(.TARGET)
 
 Instruments/libinstruments.a : Instruments/bassoon.o \
