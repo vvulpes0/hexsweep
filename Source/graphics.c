@@ -14,7 +14,7 @@ delay(unsigned int const n)
 	while (gTicks - start < n)
 	{
 		/* wait for interrupt */
-		__asm__ volatile ("trap #0" : );
+		__asm__ volatile ("trap #0" : : : "cc");
 	}
 	return;
 }
