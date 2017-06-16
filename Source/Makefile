@@ -15,21 +15,19 @@ FDEBUG=   -DDEBUG
 FDEBUG=
 .endif
 
-INCLUDEDIRS=-I$(.CURDIR) -I$(.OBJDIR) \
-            -I$(.CURDIR)/Data -I$(.CURDIR)/Include \
-            -I$(.CURDIR)/Instruments -I$(.CURDIR)/Songs
+INCLUDEDIRS=-I$(.CURDIR) -I$(.OBJDIR)\
+ -I$(.CURDIR)/Data -I$(.CURDIR)/Include\
+ -I$(.CURDIR)/Instruments -I$(.CURDIR)/Songs\
+ -I/opt/toolchains/m68k/m68k-elf/include
 ASFLAGS:= $(INCLUDEDIRS) -m68000 -l\
  --strip-local-absolute --no-pad-sections\
  -defsym SIZE=$(SIZE) -defsym HAS_SMS_PAD=1
 Z80ASFLAGS:= --no-pad-sections
-CFLAGS:= -ansi -pedantic -Wall -Wconversion -Wextra -Werror\
- -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(FDEBUG) -DSMALL_ARRAY -Wa,-l\
- $(INCLUDEDIRS)\
- -I/opt/toolchains/m68k/m68k-elf/include\
- -ffreestanding -Os -pipe\
- -mcpu=68000 -march=68000 -mtune=68000 -m68000 -mpcrel -fpie\
- -fomit-frame-pointer -fira-region=all -fweb\
- -Wa,--no-pad-sections -flto -ffat-lto-objects
+OPTFLAGS=-Os -mpcrel -fomit-frame-pointer -Wa,-l -Wa,--no-pad-sections
+WARNINGS=-Wall -Wconversion -Wextra -Werror
+CFLAGS:= -ansi -pedantic $(WARNINGS) $(INCLUDEDIRS)\
+ -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(FDEBUG) -DSMALL_ARRAY\
+ -ffreestanding -pipe -flto -ffat-lto-objects $(OPTFLAGS)
 LDFLAGS:= $(CFLAGS)\
  -Wl,-z,max-page-size=256 -Wl,-s\
  -Wl,--gc-sections -Wl,--defsym=SIZE=$(SIZE)\
