@@ -399,9 +399,7 @@ get_menu_item(unsigned int const def, Word const addr, int const start_clears)
 			option = 0;
 		}
 		VRAM_write(addr);
-		puts(option == 0 ? "*  "
-		     : option == 1 ? " * "
-		     : "  *");
+		puts("  *  " + 2 - option);
 	} while (likely(!(buttons & mask)));
 	set_autoincrement(2);
 	return option;
