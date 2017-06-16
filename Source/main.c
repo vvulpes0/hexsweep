@@ -14,7 +14,7 @@ extern void (*err_vector)(void);
 extern void (*aerr_vector)(void);
 #endif
 
-extern volatile unsigned int err_loc;
+extern unsigned int volatile err_loc;
 
 static void clear_planes    (void);
 static void configure_window(void);
