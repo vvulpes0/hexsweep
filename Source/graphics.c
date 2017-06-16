@@ -1,6 +1,6 @@
 #include "graphics.h"
 #include "common.h"
-#include "Data/font.h"
+#include "font.h"
 
 void volatile * const VDP_DATA   = (void volatile *) 0xC00000;
 void volatile * const VDP_CTRL   = (void volatile *) 0xC00004;

@@ -1,0 +1,176 @@
+track {
+	label loop
+	length 10
+	D-5
+	length 5
+	Bb4 Bb4 rest G-4 Bb4 G-4
+	length 10
+	A-4
+	length 5
+	F-4 F-4 rest F-4 G-4 E-4
+	repeat 2 {
+		length 10
+		D-4
+		length 5
+		G-4 A-4
+		length 10
+		F-4
+		length 5
+		Bb4 E-4
+		A-4 F-4 D-4 G-4 rest A-4
+		length 10
+		F-4
+		D-4
+		length 5
+		F-4 A-4
+		length 20
+		rest
+		length 10
+		Bb4
+		length 5
+		D-4 F-4
+		length 20
+		rest
+		length 10
+		A-4
+		length 5
+		C-4 E-4
+		length 20
+		rest
+		length 10
+		F-4
+		length 5
+		A-4 C-5
+		length 20
+		rest
+		length 10
+		E-4
+		length 5
+		G-4 Bb4
+		length 20
+		rest
+	}
+	length 10
+	E-4
+	length 5
+	G-4 Bb4 rest C-5 rest E-5
+	length 40
+	repeat 2 {
+		G-5 Eb5 Bb5 G-5 C-6 Eb6 A-5
+	}
+	C-5
+	length 20
+	G-4
+	length 10
+	G-4 D-5
+	goto loop
+}
+track {
+	label loop
+	length 10
+	D-5
+	length 5
+	Bb4 Bb4 rest G-4 Bb4 G-4
+	length 10
+	A-4
+	length 5
+	F-4 F-4 rest F-4 G-4 E-4
+	repeat 2 {
+		length 25
+		rest
+		length 5
+		A-4 D-5 A-4
+		length 25
+		rest
+		length 5
+		F-4 Bb4 F-4
+		length 25
+		rest
+		length 5
+		A-4 D-5 A-4
+		length 25
+		rest
+		length 5
+		F-4 Bb4 F-4
+		length 25
+		rest
+		length 5
+		E-4 A-4 E-4
+		length 25
+		rest
+		length 5
+		C-5 F-5 C-5
+		length 25
+		rest
+		length 5
+		Bb4 E-5 Bb4
+	}
+	length 25
+	rest
+	length 5
+	A-4 F-4 A-4
+	repeat 2 {
+		G-4 rest Eb4 rest D-4 rest C-4 rest
+		G-4 rest Bb4 rest G-4 rest Bb4 rest
+		Eb4 rest G-4 rest Eb4 rest G-4 rest
+		Eb4 rest G-4 rest Eb4 rest G-4 rest
+		C-4 rest Eb4 rest C-4 rest F-4 rest
+		G-4 rest A-4 rest G-4 rest Eb4 rest
+		F-4 rest C-5 rest Bb4 rest A-4 rest
+	}
+	length 20
+	G-4
+	length 10
+	A-4 C-5
+	length 5
+	Bb4 G-4 Bb4 C-5 D-5 F-5 G-5 F-5
+	goto loop
+}
+track
+{
+	label loop
+	length 10
+	D-4
+	length 5
+	Bb3 Bb3 rest G-3 Bb3 G-3
+	length 10
+	A-3
+	length 5
+	F-3 F-3 rest F-3 G-3 E-3
+	length 10
+	repeat 2
+	{
+		D-3 D-3 D-3 D-3
+		D-3 D-3 D-3 D-3
+		D-3 G-2 Bb2 G-2
+		Bb2 Bb2 Bb2 Bb2
+		A-2 A-2 A-2 A-2
+		F-3 F-3 F-3 F-3
+		E-3 E-3 E-3 E-3
+	}
+	length 10
+	E-3 F-3
+	length 20
+	A-3
+	repeat 2
+	{
+		length 40
+		G-3
+		length 5
+		Bb3 rest D-4 rest Bb3 A-3 G-3 F-3
+		length 40
+		Eb3
+		length 5
+		G-3 rest Bb3 rest G-3 F-3 Eb3 D-3
+		length 40
+		C-3
+		Eb3
+		length 20
+		F-3 Gb3
+	}
+	length 10
+	G-3 rest A-3 A-3
+	Bb3 A-3  Bb3 C-4
+	goto loop
+}
+track { halt }

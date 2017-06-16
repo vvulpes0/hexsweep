@@ -4,10 +4,10 @@
 #include "security.h"
 #include "sound.h"
 #include "ui.h"
-#include "Data/font.h"
-#include "Data/tiles.h"
-#include "Instruments/instruments.h"
-#include "Songs/playground.h"
+#include "font.h"
+#include "tiles.h"
+#include "instruments.h"
+#include "playground.h"
 
 #ifdef DEBUG
 extern void (*err_vector)(void);

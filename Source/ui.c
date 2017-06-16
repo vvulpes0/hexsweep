@@ -5,8 +5,8 @@
 #include "graphics.h"
 #include "random.h"
 #include "sound.h"
-#include "Data/font.h"
-#include "Data/tiles.h"
+#include "font.h"
+#include "tiles.h"
 
 #define BASE_ROW 3
 #define BASE_COL 5
