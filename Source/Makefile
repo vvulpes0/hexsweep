@@ -7,18 +7,12 @@ CC=       m68k-elf-gcc
 LD=       m68k-elf-gcc
 Z80AS=    z80-coff-as
 Z80LD=    z80-coff-ld
-PATH:=    $(.CURDIR)/../PC-Bin:$(PATH)
+PATH:=    $(.CURDIR:H)/PC-Bin:$(PATH)
 .export-env PATH
-.ifdef DEBUG
-FDEBUG=   -DDEBUG
-.else
-FDEBUG=
-.endif
 
-INCLUDEDIRS=-I$(.CURDIR) -I$(.OBJDIR)\
- -I$(.CURDIR)/Data -I$(.CURDIR)/Include\
- -I$(.CURDIR)/Instruments -I$(.CURDIR)/Songs\
- -I/opt/toolchains/m68k/m68k-elf/include
+DIRS=Data Include Instruments Songs
+INCLUDEDIRS=$(DIRS:S/^/-I$(.CURDIR)\//) -I$(.CURDIR) -I$(.OBJDIR)
+INCLUDEDIRS+=-I/opt/toolchains/m68k/m68k-elf/include
 ASFLAGS:= $(INCLUDEDIRS) -m68000 -l\
  --strip-local-absolute --no-pad-sections\
  -defsym SIZE=$(SIZE) -defsym HAS_SMS_PAD=1
@@ -26,7 +20,7 @@ Z80ASFLAGS:= --no-pad-sections
 OPTFLAGS=-Os -mpcrel -fomit-frame-pointer -Wa,-l -Wa,--no-pad-sections
 WARNINGS=-Wall -Wconversion -Wextra -Werror
 CFLAGS:= -ansi -pedantic $(WARNINGS) $(INCLUDEDIRS)\
- -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(FDEBUG) -DSMALL_ARRAY\
+ -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(DEBUG:D-DDEBUG) -DSMALL_ARRAY\
  -ffreestanding -pipe -flto -ffat-lto-objects $(OPTFLAGS)
 LDFLAGS:= $(CFLAGS)\
  -Wl,-z,max-page-size=256 -Wl,-s\
@@ -50,7 +44,7 @@ OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
 .c.o             : ; $(CC) $(CFLAGS) -o $(.TARGET) -c $(.IMPSRC)
 .s.o             : ; $(AS) $(ASFLAGS) -o $(.TARGET) -c $(.IMPSRC)
 .s80.o80         : ; $(Z80AS) $(Z80ASFLAGS) -o $(.TARGET) -c $(.IMPSRC)
-.o80             : ; $(Z80LD) $(Z80LDFLAGS) $(.ALLSRC) -o $(.TARGET)
+.o80             : ; $(Z80LD) $(Z80LDFLAGS) $(.ALLSRC:O) -o $(.TARGET)
 .song.osong      : ; sc < $(.IMPSRC) > $(.TARGET)
 .o.co            : ; dump-bytes $(.IMPSRC)\
                    | compress $(.ALLSRC:[2..-1]) > $(.TARGET)
@@ -64,14 +58,13 @@ OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
 .MAIN : hexsweep.bin
 
 hexsweep.bin       : $(OBJS) libinstruments.a
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $(.TARGET) &&\
+	$(LD) $(LDFLAGS) $(.ALLSRC:M*.o:O) $(LIBS) -o $(.TARGET)
 	mdchksum -f $(.TARGET)
 output.map         : hexsweep.bin ; :
 
 libinstruments.a   : bassoon.o clarinet.o grand-piano.o
-	$(AR) -rcs $(.TARGET) $(.ALLSRC)
+	$(AR) -rcs $(.TARGET) $(.ALLSRC:O)
 
-sound-driver       : sound-driver.o80
 graphics.o         : graphics.c common.h font.h graphics.h
 main.o             : main.c common.h decompress.h font.h    \
                      graphics.h instruments.h playground.h  \
@@ -109,7 +102,7 @@ show-size ! output.map ; awk '\
 		}                                            \
 	}                                                    \
 	/^\.fill/ { print parsehex($$2) }'                   \
-	$(.ALLSRC)
+	$(.ALLSRC:[1])
 
 .PHONY : clean
 clean ::

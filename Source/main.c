@@ -14,7 +14,7 @@ extern void (*err_vector)(void);
 extern void (*aerr_vector)(void);
 #endif
 
-extern unsigned int err_loc;
+extern volatile unsigned int err_loc;
 
 static void clear_planes    (void);
 static void configure_window(void);
@@ -23,8 +23,8 @@ static void load_palettes   (void);
 
 /* Debugging functions */
 static void gray_out(void);
-static void die(void);
 #ifdef DEBUG
+static void die(void);
 static void addr_error(void);
 #endif
 
@@ -70,7 +70,7 @@ main(void)
 		return 0;
 	}
 
-	die();
+	gray_out();
 	return 1;
 }
 
@@ -196,6 +196,7 @@ gray_out(void)
 	enable_display(1);
 }
 
+#ifdef DEBUG
 static void
 die(void)
 {
@@ -215,7 +216,6 @@ die(void)
 	while (1);
 }
 
-#ifdef DEBUG
 static void
 addr_error(void)
 {
