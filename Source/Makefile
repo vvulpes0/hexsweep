@@ -59,7 +59,7 @@ OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
 
 hexsweep.bin       : $(OBJS) libinstruments.a
 	$(LD) $(LDFLAGS) $(.ALLSRC:M*.o:O) $(LIBS) -o $(.TARGET)
-	mdchksum -f $(.TARGET)
+	mdchksum -if $(.TARGET)
 output.map         : hexsweep.bin ; :
 
 libinstruments.a   : bassoon.o clarinet.o grand-piano.o
