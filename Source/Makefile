@@ -12,7 +12,6 @@ PATH:=    $(.CURDIR:H)/PC-Bin:$(PATH)
 
 DIRS=Data Include Instruments Songs
 INCLUDEDIRS=$(DIRS:S/^/-I$(.CURDIR)\//) -I$(.CURDIR) -I$(.OBJDIR)
-INCLUDEDIRS+=-I/opt/toolchains/m68k/m68k-elf/include
 ASFLAGS:= $(INCLUDEDIRS) -m68000 -l\
  --strip-local-absolute --no-pad-sections\
  -defsym SIZE=$(SIZE) -defsym HAS_SMS_PAD=1
@@ -28,9 +27,7 @@ LDFLAGS:= $(CFLAGS)\
  -Wl,-T,$(.CURDIR)/md.ld -Wl,-Map,output.map -nostdlib\
  -Wl,--relax -Wl,-O1 -fuse-linker-plugin
 Z80LDFLAGS:= -s --gc-sections -T $(.CURDIR)/z80.ld
-LIBS:= -L$(.OBJDIR) -L/opt/toolchains/m68k/m68k-elf/lib\
- -L/opt/toolchains/m68k/m68k-elf/gcc\
- -linstruments -lc -lgcc -lnosys
+LIBS:= -L$(.OBJDIR) -linstruments -lc -lgcc -lnosys
 OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
  decompress.o font.o graphics.o hardware.o main.o mines.o playground.o\
  random.o rom-header.o security.o sound.o tiles.o ui.o
