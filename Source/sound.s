@@ -80,8 +80,6 @@ sound_command:
 	.global sound_driver
 sound_driver:
 	.long   r_sound_driver
-
-	.section .rodata.str1.1, "a"
 r_sound_driver:
 	.word   DRIVER_SIZE
 r_sound_driver_start:

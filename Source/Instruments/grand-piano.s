@@ -3,8 +3,6 @@
 	.global grand_piano
 grand_piano:
 	.long r_grand_piano
-	
-	.section .rodata.str1.1, "a"
 r_grand_piano:
 	.byte  0x32
 	.byte  0x71, 0x0d, 0x33, 0x01

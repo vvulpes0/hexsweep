@@ -26,8 +26,6 @@ font_words:
 	.global charmap
 charmap:
 	.long   charmap_data
-
-	.section .rodata.str1.1, "a"
 charmap_data:
 	|| 0x20-0x2F
 	index   space           | space

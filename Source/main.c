@@ -22,7 +22,7 @@ static void enable_cursor   (void);
 static void load_palettes   (void);
 
 /* Debugging functions */
-void gray_out(void);
+static void gray_out(void);
 #ifdef DEBUG
 static void die(void);
 static void addr_error(void);
@@ -186,7 +186,7 @@ load_palettes(void)
 }
 
 /* Debugging functions */
-void
+static void
 gray_out(void)
 {
 	enable_display(0);
