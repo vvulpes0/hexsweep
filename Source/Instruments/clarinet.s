@@ -3,6 +3,8 @@
 	.global clarinet
 clarinet:
 	.long r_clarinet
+
+	.section .rodata.str1.1, "a"
 r_clarinet:
 	.byte  0x02
 	.byte  0x01, 0x02, 0x04, 0x01

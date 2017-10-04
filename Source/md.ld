@@ -61,16 +61,20 @@ SECTIONS
   {
     KEEP(rom-header.o(.rodata))
   } > rom AT> rom :text =0x20
+
   .startup :
   SUBALIGN(2)
   {
     KEEP(crt0.o(.text))
+    . = ALIGN(16);
   } > rom AT> rom :text =0xff
   __copy_source = .;
   __copy_dest = ORIGIN(ram);
+
   .text :
   SUBALIGN(2)
   {
+    . = ALIGN(16);
     __text_start = .;
     *(SORT_BY_ALIGNMENT(.text*))
     *(.gnu.linkonce.t.*)
@@ -90,7 +94,7 @@ SECTIONS
     KEEP (*(.jcr))
 
 /*
-    . = ALIGN(16);
+    . = ALIGN(2);
     __CTOR_LIST__ = .;
     ___CTOR_LIST__ = .;
     LONG((__CTOR_END__ - __CTOR_LIST__) / 4 - 2)
@@ -99,7 +103,7 @@ SECTIONS
     LONG(0)
     __CTOR_END__ = .;
 
-    . = ALIGN(16);
+    . = ALIGN(2);
     __DTOR_LIST__ = .;
     ___DTOR_LIST__ = .;
     LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2)
@@ -108,15 +112,30 @@ SECTIONS
     LONG(0)
     __DTOR_END__ = .;
 */
+  } > ram AT> rom :text =0xFF
 
+  .romfill.1 :
+  {
+    . = ALIGN(16);
+  } > rom :text =0xff
+
+  .rodata :
+  {
     *(SORT_BY_ALIGNMENT(.rdata) SORT_BY_ALIGNMENT(.rodata*))
     *(.gnu.linkonce.r.*)
-    . = ALIGN(16);
     __text_end = .;
   } > ram AT> rom :text =0xFF
   __text_size = __text_end - __text_start;
 
+/*
+  .romfill.2 :
+  {
+    . = ALIGN(16);
+  } > rom :text =0xff
+*/
+
   .data :
+  SUBALIGN(2)
   {
     __data_start = .;
     *(SORT_BY_ALIGNMENT(.data*))
@@ -127,12 +146,20 @@ SECTIONS
     *(.lit4)
     *(SORT_BY_ALIGNMENT(.sdata*))
     *(.gnu.linkonce.s.*)
-    . = ALIGN(16);
     __data_end = .;
   } > ram AT> rom :data =0xFF
   __data_size = __data_end - __data_start;
   __copy_size = __text_size + __data_size;
+
+/*
+  .romfill.3 :
+  {
+    . = ALIGN(16);
+  } > rom :text =0xff
+*/
+
   .bss (NOLOAD) :
+  SUBALIGN(2)
   {
     __bss_start = .;
     *(.bss*)
@@ -142,7 +169,7 @@ SECTIONS
     *(.scommon)
     *(COMMON)
     end = .;
-    _end = ALIGN (8);
+    _end = ALIGN (0);
     __end = _end;
     __bss_end = .;
   } > ram AT> rom
