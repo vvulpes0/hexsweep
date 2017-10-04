@@ -10,7 +10,7 @@
 
 | Sega Genesis / Mega Drive ROM header at 0x100, 256 bytes long
 	.ascii "SEGA GENESIS    "
-	.ascii "(C) DJL 2016.SEP"
+	.ascii "(C) DJL 2017.OCT"
 	.ascii "HEX SWEEPER                                     " | JP
 	.ascii "HEX SWEEPER                                     " | US/EU
 	.ascii "GM T-999999 00"

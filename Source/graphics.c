@@ -8,7 +8,7 @@ void volatile * const VDP_CTRL   = (void volatile *) 0xC00004;
 static void VRAM_addr(Word const, Word const);
 
 void
-delay(unsigned int const n)
+delay(unsigned long const n)
 {
 	DWord const start = gTicks;
 	while (gTicks - start < n)

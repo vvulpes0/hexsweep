@@ -5,10 +5,12 @@
 
 #include "random.h"
 
-static unsigned int       seed                =      1;
-static unsigned int const multiplier          =  16087;
-static unsigned int const max_over_multiplier = 127773;
-static unsigned int const max_mod_multiplier  =   2836;
+#define MULTIPLIER 16087
+
+static unsigned int       seed                = 1;
+static unsigned int const multiplier          = MULTIPLIER;
+static unsigned int const max_over_multiplier = RAND_MAX / MULTIPLIER;
+static unsigned int const max_mod_multiplier  = RAND_MAX % MULTIPLIER;
 
 unsigned int
 rand_range(unsigned int const min, unsigned int const max)

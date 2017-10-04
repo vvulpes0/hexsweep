@@ -31,7 +31,7 @@ extern void  volatile * const VDP_CTRL;
 	(*(DWord volatile *)VDP_DATA = (DWord)(x))
 #define CDATA_word VDATA_word
 #define CRAM_write(pindex, cindex) \
-	(*(DWord volatile *)VDP_CTRL = (DWord)(0xC0000000 | (pindex) << 21 | (cindex) << 17))
+	(*(DWord volatile *)VDP_CTRL = (DWord)(0xC0000000UL | ((DWord)(pindex)) << 21 | ((DWord)(cindex)) << 17))
 #define Plane_A(r, c) \
 	((Word)(0xC000 | (((r) << 6) + ((c) << 1))))
 #define Plane_B(r, c) \
@@ -51,7 +51,7 @@ extern void  volatile * const VDP_CTRL;
 #define PRIORITY ((Word)(0x8000U))
 
 /* Delay for n VBIs */
-void delay(unsigned int const);
+void delay(unsigned long const);
 /* Switch to Read Mode and set the target address into VRAM
  * Parameters: address */
 void VRAM_read(Word const);

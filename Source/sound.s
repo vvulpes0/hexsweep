@@ -67,7 +67,11 @@ load_song:
 	.global sound_command
 sound_command:
 	bsr      wait_for_ready
+	.ifdef USING_MSHORT
+	move.b   5(%sp), (COMMAND)
+	.else
 	move.b   7(%sp), (COMMAND)
+	.endif
 	move.b   #0, (Z80_BusReq)
 	rts
 

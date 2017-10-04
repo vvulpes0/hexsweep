@@ -4,6 +4,6 @@
 #include "common.h"
 
 void load_tiles(DWord const * const, Byte const * const,
-                unsigned int const, unsigned short const);
+                unsigned long const, unsigned long const);
 
 #endif

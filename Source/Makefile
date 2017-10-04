@@ -10,24 +10,29 @@ Z80LD=    z80-coff-ld
 PATH:=    $(.CURDIR:H)/PC-Bin:$(PATH)
 .export-env PATH
 
+SHORT=
+
 DIRS=Data Include Instruments Songs
 INCLUDEDIRS=$(DIRS:S/^/-I$(.CURDIR)\//) -I$(.CURDIR) -I$(.OBJDIR)
 ASFLAGS:= $(INCLUDEDIRS) -m68000 -l\
+ $(SHORT:D--defsym USING_MSHORT=1)\
  --strip-local-absolute --no-pad-sections\
  -defsym SIZE=$(SIZE) -defsym HAS_SMS_PAD=1
 Z80ASFLAGS:= --no-pad-sections
-OPTFLAGS=-Os -mpcrel -fomit-frame-pointer -Wa,-l -Wa,--no-pad-sections
+OPTFLAGS=-Os -mpcrel $(SHORT:D-mshort) -fomit-frame-pointer\
+ -Wa,-l -Wa,--no-pad-sections
 WARNINGS=-Wall -Wconversion -Wextra -Werror
-CFLAGS:= -ansi -pedantic $(WARNINGS) $(INCLUDEDIRS)\
- -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(DEBUG:D-DDEBUG) -DSMALL_ARRAY\
- -ffreestanding -pipe -flto -ffat-lto-objects $(OPTFLAGS)
+CFLAGS:= -m68000 $(OPTFLAGS) -ansi -pedantic $(WARNINGS) $(INCLUDEDIRS)\
+ -DSIZE=$(SIZE) -DHAS_SMS_PAD=1 $(DEBUG:D-DDEBUG)\
+ -ffreestanding -pipe\
+# -flto -ffat-lto-objects
 LDFLAGS:= $(CFLAGS)\
- -Wl,-z,max-page-size=256 -Wl,-s\
+ -Wl,-z,max-page-size=256 -Wl,-s -Wl,--cref\
  -Wl,--gc-sections -Wl,--defsym=SIZE=$(SIZE)\
- -Wl,-T,$(.CURDIR)/md.ld -Wl,-Map,output.map -nostdlib\
+ -Wl,-T,$(.CURDIR)/md.ld -Wl,-Map,output.map -nostartfiles\
  -Wl,--relax -Wl,-O1 -fuse-linker-plugin
 Z80LDFLAGS:= -s --gc-sections -T $(.CURDIR)/z80.ld
-LIBS:= -L$(.OBJDIR) -linstruments -lc -lgcc -lnosys
+LIBS:= -L$(.OBJDIR) -linstruments
 OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
  decompress.o font.o graphics.o hardware.o main.o mines.o playground.o\
  random.o rom-header.o security.o sound.o tiles.o ui.o

@@ -22,7 +22,7 @@ static void enable_cursor   (void);
 static void load_palettes   (void);
 
 /* Debugging functions */
-static void gray_out(void);
+void gray_out(void);
 #ifdef DEBUG
 static void die(void);
 static void addr_error(void);
@@ -81,7 +81,7 @@ clear_planes(void)
 {
 	#if NORMAL_MODE
 	unsigned int i;
-	unsigned int  j;
+	unsigned int j;
 	static Word const addrs[] = {Plane_B(0, 0),
 	                             Plane_A(0, 0),
 	                             Plane_W(0, 0)};
@@ -186,7 +186,7 @@ load_palettes(void)
 }
 
 /* Debugging functions */
-static void
+void
 gray_out(void)
 {
 	enable_display(0);

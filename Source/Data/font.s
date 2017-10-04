@@ -19,6 +19,10 @@ font:
 font_huffman_table:
 	.long   font_huffman_table_data
 
+	.global font_words
+font_words:
+	.long   ((font_end - characters) / 2)
+
 	.global charmap
 charmap:
 	.long   charmap_data
@@ -125,10 +129,6 @@ charmap_data:
 	index   space           | }
 	index   space           | ~
 	index   space           | DEL
-
-	.global font_words
-font_words:
-	.long   ((font_end - characters) / 2)
 
 	.section .compressible
 characters:

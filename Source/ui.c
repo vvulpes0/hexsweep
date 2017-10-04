@@ -31,7 +31,7 @@ static unsigned int    num_uncovered;
 static unsigned int    prev_dir;
 static          int    lost;
 
-static Word add_palette_bit(Word const, int const);
+static Word add_palette_bit(Word const, unsigned int const);
 static int handle_input (void );
 static int is_flagged (Row const, Column const) __attribute__((pure));
 static int is_open (Row const, Column const) __attribute__((pure));
@@ -82,7 +82,7 @@ event_loop(void)
 		write_count(num_flagged);
 		VRAM_write(Plane_A(BASE_ROW + BOARD_HEIGHT + 1,
 		                   BASE_COL + BOARD_WIDTH - 2));
-		write_score(SCORE);
+		write_score((unsigned int)SCORE);
 		read_joypad();
 	} while (likely(handle_input()
 	                && !lost
@@ -97,8 +97,9 @@ event_loop(void)
 		puts(lost ? "lose" : "win");
 		if (!lost)
 		{
-			best_score[difficulty] = MIN(best_score[difficulty],
-			                             SCORE);
+			best_score[difficulty] = (unsigned int)
+				MIN(best_score[difficulty],
+				    SCORE);
 		}
 		do {
 			delay(1);
@@ -258,7 +259,7 @@ screen_col(Row const row, Column const col)
 }
 
 static Word
-add_palette_bit(Word const address, int const pindex)
+add_palette_bit(Word const address, unsigned int const pindex)
 {
 	Word data;
 
@@ -300,7 +301,7 @@ show_grid(void)
 		VRAM_write(Plane_A(i + BASE_ROW, BASE_COL));
 		for (j = 0; likely(j <= BOARD_WIDTH); ++j)
 		{
-			VDATA_word((Word)(0 << 13 | tile_for_loc(i, j)));
+			VDATA_word((Word)(tile_for_loc(i, j)));
 		}
 	}
 
@@ -319,7 +320,7 @@ show_grid(void)
 unsigned int
 tile_for_loc(unsigned int const row, unsigned int const col)
 {
-	unsigned int tile;
+	unsigned int  tile;
 	unsigned int  grid_col;
 	Cell          c;
 	int const     is_odd = (col ^ (row >> 1)) & 1;
@@ -488,6 +489,6 @@ title_screen(void)
 	                  Plane_B(BASE_ROW + 6,
 	                          BASE_COL + BOARD_WIDTH / 2 - 2),
 	                  0);
-	srand(gTicks);
+	srand((unsigned int)gTicks);
 	return d;
 }

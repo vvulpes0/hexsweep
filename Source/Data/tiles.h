@@ -25,6 +25,6 @@ enum {
 
 extern Byte           const * const tiles_huffman_table;
 extern DWord          const * const tiles;
-extern unsigned int   const         tileset_words;
+extern unsigned long  const         tileset_words;
 
 #endif

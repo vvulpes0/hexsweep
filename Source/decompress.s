@@ -2,14 +2,20 @@
 	.global load_tiles
 	|| Input: Word *          address (of compressed data)
 	||        Byte *          address (of decompression table)
-	||        unsigned int    num_words (of decompressed data)
-	||        unsigned short  base_tile
+	||        unsigned long   num_words (of decompressed data)
+	||        unsigned long   base_tile
 load_tiles:
 	move.l  16(%sp), %d0            | base_tile
 	lsl.w   #5, %d0                 |  * 32 bytes
+	.ifdef USING_MSHORT             | using -mshort, align word
+	move.w  %d0, -(%sp)
+	bsr     VRAM_write
+	addq    #2, %sp
+	.else                           | not -mshort, align longword
 	move.l  %d0, -(%sp)
 	bsr     VRAM_write
 	addq    #4, %sp
+	.endif
 	movea.l 4(%sp), %a0             | address
 	move.l  12(%sp), %d0            | num_words
 	subq    #1, %d0                 |  less one for looping
