@@ -15,6 +15,9 @@ __DYNAMIC  =  0;
  * .                    .
  * .                    .
  * +--------------------+ <- 0x00FF0000
+ * | Copy of .text      |
+ * |  ROM copy not used |
+ * +--------------------+
  * | .data              | initialized data goes here
  * |                    |
  * |          _data_end |
@@ -61,13 +64,13 @@ SECTIONS
   {
     KEEP(rom-header.o(.rodata))
   } > rom AT> rom :text =0x20
+
   .startup :
   SUBALIGN(2)
   {
     KEEP(crt0.o(.text))
   } > rom AT> rom :text =0xff
-  __copy_source = .;
-  __copy_dest = ORIGIN(ram);
+
   .text :
   SUBALIGN(2)
   {
@@ -75,11 +78,9 @@ SECTIONS
     *(SORT_BY_ALIGNMENT(.text*))
     *(.gnu.linkonce.t.*)
 
-    . = ALIGN(2);
     __INIT_SECTION__ = .;
     KEEP (*(.init))
     SHORT (0x4E75)	/* rts */
-    . = ALIGN(2);
     __FINI_SECTION__ = .;
     KEEP (*(.fini))
     SHORT (0x4E75)	/* rts */
@@ -89,35 +90,45 @@ SECTIONS
     *(.gcc_except_table)
     KEEP (*(.jcr))
 
-/*
-    . = ALIGN(16);
-    __CTOR_LIST__ = .;
-    ___CTOR_LIST__ = .;
-    LONG((__CTOR_END__ - __CTOR_LIST__) / 4 - 2)
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors))
-    LONG(0)
-    __CTOR_END__ = .;
+    /* . = ALIGN(16); */
+    /* __CTOR_LIST__ = .; */
+    /* ___CTOR_LIST__ = .; */
+    /* LONG((__CTOR_END__ - __CTOR_LIST__) / 4 - 2) */
+    /* KEEP (*(SORT(.ctors.*))) */
+    /* KEEP (*(.ctors)) */
+    /* LONG(0) */
+    /* __CTOR_END__ = .; */
 
-    . = ALIGN(16);
-    __DTOR_LIST__ = .;
-    ___DTOR_LIST__ = .;
-    LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2)
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors))
-    LONG(0)
-    __DTOR_END__ = .;
-*/
+    /* . = ALIGN(16); */
+    /* __DTOR_LIST__ = .; */
+    /* ___DTOR_LIST__ = .; */
+    /* LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2) */
+    /* KEEP (*(SORT(.dtors.*))) */
+    /* KEEP (*(.dtors)) */
+    /* LONG(0) */
+    /* __DTOR_END__ = .; */
+  } > ram AT> rom :text =0xFF
 
+  .rodata :
+  {
     *(SORT_BY_ALIGNMENT(.rdata) SORT_BY_ALIGNMENT(.rodata*))
     *(.gnu.linkonce.r.*)
-    . = ALIGN(16);
     __text_end = .;
+    __text_size = __text_end - __text_start;
   } > ram AT> rom :text =0xFF
-  __text_size = __text_end - __text_start;
 
   .data :
+  ALIGN(4)
+  SUBALIGN(2)
   {
+    /* (BUG -- mine or the toolchain's?)        */
+    /* With GCC 7.2.0 and Binutils 2.29.1, the  */
+    /* preceding ALIGN expression prevents a    */
+    /* strange failure where data is improperly */
+    /* read.  I don't think misaligned accesses */
+    /* are at fault, though, because the m68k   */
+    /* only requires word-alignment, but values */
+    /* other than multiples of 4 do not work.   */
     __data_start = .;
     *(SORT_BY_ALIGNMENT(.data*))
     *(.gnu.linkonce.d.*)
@@ -127,11 +138,17 @@ SECTIONS
     *(.lit4)
     *(SORT_BY_ALIGNMENT(.sdata*))
     *(.gnu.linkonce.s.*)
-    . = ALIGN(16);
     __data_end = .;
+    __data_size = __data_end - __data_start;
   } > ram AT> rom :data =0xFF
-  __data_size = __data_end - __data_start;
-  __copy_size = __text_size + __data_size;
+
+  .empty (NOLOAD) :
+  {
+    __copy_source = LOADADDR(.text);
+    __copy_size = ABSOLUTE(.) - __copy_source;
+    __copy_dest = ORIGIN(ram);
+  } > rom AT> rom :data =0xFF
+
   .bss (NOLOAD) :
   {
     __bss_start = .;
@@ -145,8 +162,8 @@ SECTIONS
     _end = ALIGN (8);
     __end = _end;
     __bss_end = .;
+    __bss_size = __bss_end - __bss_start;
   } > ram AT> rom
-  __bss_size = __bss_end - __bss_start;
 
   .fill :
   {

@@ -12,7 +12,7 @@ PHDRS
 
 MEMORY
 {
-  ram (rx) : ORIGIN = 0x0000, LENGTH = 0x2000
+  ram (wx) : ORIGIN = 0x0000, LENGTH = 0x2000
 }
 
 PROVIDE (__stack = ORIGIN(ram) + LENGTH(ram));

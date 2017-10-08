@@ -9,6 +9,7 @@ VDPRAM:
 	.word   0xC000, 0x0000 | write CRAM address 0
 	.word   0x4000, 0x0010 | write VSRAM address 0
 
+	.section .rodata.bytes, "a"
 	|| VDP register initialization values
 VDPRegs:
 	.byte   0x04 | 8004 => write reg 0 = /IE1 (no HBL INT), /M3 (enable read H/V cnt)

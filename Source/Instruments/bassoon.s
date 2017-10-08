@@ -3,6 +3,7 @@
 	.global bassoon
 bassoon:
 	.long r_bassoon
+	.section .rodata.bytes, "a"
 r_bassoon:
 	.byte  0x04
 	.byte  0x00, 0x02, 0x12, 0x00
