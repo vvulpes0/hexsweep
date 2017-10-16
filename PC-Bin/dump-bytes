@@ -1,8 +1,8 @@
 #!/bin/sh
-m68k-elf-objdump -j .compressible -s "$1" |\
-tail -n '+5'                              |\
-cut -d' ' -f'3-6'                         |\
-tr ' ' '\n'                               |\
-sed -e 's@\(..\)@\1 @g'                    \
-    -e 's/ $//'                           |\
-tr ' ' '\n'
+m68k-elf-objdump -j .compressible -s "$1"  \
+| tail -n '+5'                             \
+| cut -d' ' -f'3-6'                        \
+| tr ' ' '\n'                              \
+| sed -e 's@\(..\)@\1 @g'                  \
+      -e 's/ $//'                          \
+| tr ' ' '\n'
