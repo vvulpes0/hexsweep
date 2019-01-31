@@ -1,9 +1,3 @@
-	.bss
-	.align 2
-	.global gTicks
-gTicks:
-	.long   0
-
 	.text
 	.align 2
 	.global _start

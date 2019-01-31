@@ -2,6 +2,8 @@
 #include "common.h"
 #include "font.h"
 
+DWord volatile const gTicks = 0;
+
 void volatile * const VDP_DATA   = (void volatile *) 0xC00000;
 void volatile * const VDP_CTRL   = (void volatile *) 0xC00004;
 
