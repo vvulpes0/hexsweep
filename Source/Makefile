@@ -1,5 +1,5 @@
 KILOBIT=  64
-SIZE!=    awk 'BEGIN {print $(KILOBIT) * 128; quit}'
+SIZE!=    awk 'BEGIN {print $(KILOBIT) * 128; exit}'
 
 AR=       m68k-elf-ar
 AS=       m68k-elf-as
@@ -45,7 +45,7 @@ OBJS= compressed-font.o compressed-tiles.o controls.o crt0.o\
 
 .c.o             : ; $(CC) $(CFLAGS) -o $(.TARGET) -c $(.IMPSRC)
 .s.o             : ; $(AS) $(ASFLAGS) -o $(.TARGET) -c $(.IMPSRC)
-.s80.o80         : ; $(Z80AS) $(Z80ASFLAGS) -o $(.TARGET) -c $(.IMPSRC)
+.s80.o80         : ; $(Z80AS) $(Z80ASFLAGS) -o $(.TARGET) $(.IMPSRC)
 .o80             : ; $(Z80LD) $(Z80LDFLAGS) $(.ALLSRC:O) -o $(.TARGET)
 .song.osong      : ; sc < $(.IMPSRC) > $(.TARGET)
 .o.co            : ; dump-bytes $(.IMPSRC)\

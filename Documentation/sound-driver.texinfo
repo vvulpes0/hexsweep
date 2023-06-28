@@ -1,0 +1,290 @@
+\input texinfo
+@settitle A simple sound driver
+@setchapternewpage off
+
+@node Top
+@top Sound Driver
+
+This file documents the sound driver used in Hex Sweeper.
+
+@menu
+* Overview::                    Overview
+* Formats::                     Formats
+@end menu
+
+@node Overview
+@chapter Overview
+
+The purpose of this driver is to be small,
+while still making use of the YM2612 FM synthesis.
+Consequently, the driver is not very flexible.
+For example, the driver always operates on four channels of audio,
+with the panning of each channel set to center.
+
+@node Formats
+@chapter Formats
+
+The data formats of the driver are meant to correlate closely
+with the YM2612 hardware.
+This allows more time to be spent playing the song
+instead of waiting to process it.
+
+@menu
+* Voices::                      FM Voices
+* Track Header::                Track Header
+* Commands::                    Track Command Language
+@end menu
+
+@node Voices
+@section FM Voices
+
+Voice data is stored as an array of 0x19 bytes, as follows:
+
+@multitable {Offset} {Sustain Level / Release Rate} {0x88 0x88 0x88 0x88}
+@headitem Offset @tab Meaning @tab ``Grand Piano''
+@item 0x00
+@tab Feedback/Algorithm
+@tab 0x32
+@item 0x01
+@tab Detune / Multiplier
+@tab 0x71 0x0d 0x33 0x01
+@item 0x05
+@tab Total Level
+@tab 0x23 0x2d 0x26 0x00
+@item 0x09
+@tab Rate Scaling / Attack Rate
+@tab 0x5f 0x99 0x5f 0x94
+@item 0x0d
+@tab AM level / Decay 1 Rate
+@tab 0x05 0x05 0x05 0x07
+@item 0x11
+@tab Decay 2 Rate
+@tab 0x02 0x02 0x02 0x02
+@item 0x15
+@tab Sustain Level / Release Rate
+@tab 0x11 0x11 0x11 0xa6
+@end multitable
+
+@node Track Header
+@section Track Header
+
+Following in the philosophy of simplicity,
+a song does not specify which instruments it should use.
+In fact, the only metadata the song stores is
+a set of pointers to track data.
+Each song contains four tracks,
+and the header consists of four 16-bit words
+in big-endian format describing the offset of each track
+from the beginning of the header.
+
+@node Commands
+@section Track Command Language
+
+In this section we describe the track command language.
+
+@menu
+* Notes::                       Playing Notes
+* Rest::                        Playing a Rest
+* Delay::                       Setting Delay Values
+* Branch Setup::                Branch Setup
+* Unconditional Branches::      Unconditional Branches
+* Conditional Branches::        Conditional Branches
+* Sustain::                     Inhibiting Key-Off
+* Halt::                        Terminating Playback
+@end menu
+
+@node Notes
+@subsection Playing Notes
+
+@example
+@group
+  7    6 5 4   3 2 1 0
++-----------------------+
+| 0   octave   position |  0x00-0x7F
++-----------------------+
+@end group
+@end example
+
+@noindent
+Upon reaching a note command,
+the driver will perform a key-on for the specified note,
+delay (@pxref{Delay}),
+then perform a key-off.
+
+An octave may be divided into 12 notes spaced one semitone apart.
+Beginning with C, these would be listed as either
+
+@example
+@group
+C C# D D# E F F# G G# A A# B, or
+C Db D Eb E F Gb G Ab A Bb B.
+@end group
+@end example
+
+@noindent
+The position is the zero-based index into this list.
+So C is 0, while G is 7.
+The octave is as in scientific-notation.
+Only those octaves between 0 and 7 inclusive are represented.
+Thus, middle C (C-4) is listed as 0x40.
+For any note,
+the octave number is the first digit in the hexadecimal notation.
+
+Attempting to play a note with a position beyond B
+(that is, any from 0xc through 0xf inclusive)
+is undefined behavior.
+
+@node Rest
+@subsection Playing a Rest
+
+@example
+@group
+  7 6 5 4 3 2 1 0
++-----------------+
+| 1 0 0 0 0 0 0 0 |  0x80
++-----------------+
+@end group
+@end example
+
+@noindent
+Upon reaching a rest command,
+the driver delays (@pxref{Delay}),
+then continues.
+
+@node Delay
+@subsection Setting Delay Values
+
+@example
+@group
+  7 6 5 4 3 2 1 0   7 6 5 4 3 2 1 0
++-----------------+-----------------+
+| 1 1 0 1 0 0 0 0 | delay length    |  0xD0__
++-----------------+-----------------+
+@end group
+@end example
+
+@noindent
+Upon reaching a delay command,
+the driver sets the delay length.
+For NTSC systems,
+an input length of @math{n} results in notes that are roughly
+
+@center @math{0.3125 n} seconds
+
+@noindent
+in length.
+However, an input length of zero does not make much sense,
+so as a special case this is treated as 256 instead.
+
+A delay of 0x10 produces a quarter-note at 120 bpm.
+
+@node Branch Setup
+@subsection Branch Setup
+
+@example
+@group
+  7 6 5 4   3 2 1 0
++-------------------+
+| 1 1 1 1   count   |  0xF_
++-------------------+
+@end group
+@end example
+
+@noindent
+Upon reaching a branch setup command,
+the driver loads its current playback address into the loopback register
+and sets a counter to `count'.
+As a special case, a count of zero is treated as 16.
+
+Branch setups may not be nested.
+A branch setup command will overwrite the data from any earlier ones.
+
+@node Unconditional Branches
+@subsection Unconditional Branches
+
+@example
+@group
+  7 6 5 4 3 2 1 0   7 6 5 4 3 2 1 0
++-----------------+-----------------+
+| 1 1 1 0 0 0 0 1 |   displacement  |  0xE1__
++-----------------+-----------------+
+@end group
+@end example
+
+@noindent
+An unconditional branch command causes the current playback location
+to be advanced then moved by the given eight-bit biased displacement.
+This is quite different from the conditional branch command
+(@pxref{Conditional Branches}).
+
+The bias is such that 0x00 corresponds to -253 bytes,
+and 0xff is only +2.
+This is the largest possible backward branch possible
+while still allowing a branch statement to be passed over,
+thereby allowing a song to use chained back-branches.
+
+The halt command (@pxref{Halt}) may seem to be equivalent to
+a command that is an unconditional branch to itself (0xe1 0xfb),
+encoded in a single byte.
+However, using this two-byte command will cause the driver to
+permanently stop playback until the CPU is reset,
+whereas the halt command allows other channels to continue playing.
+
+A loop containing neither notes nor rests
+will prevent the driver from accepting commands,
+thereby requiring a complete reset of the CPU to continue.
+Please do not include such loops in songs.
+
+@node Conditional Branches
+@subsection Conditional Branches
+
+@example
+@group
+  7 6 5 4 3 2 1 0
++-----------------+
+| 1 1 1 0 0 0 0 0 |  0xE0
++-----------------+
+@end group
+@end example
+
+@noindent
+When the driver meets a conditional branch command,
+it decreases the loop count register by one.
+If the result is equal to zero, playback continues as normal.
+Otherwise, the playback location is set to
+the contents of the loopback register.
+
+@node Sustain
+@subsection Inhibiting Key-Off
+
+@example
+@group
+  7 6 5 4 3 2 1 0
++-----------------+
+| 1 1 1 0 1 1 1 1 |  0xEF
++-----------------+
+@end group
+@end example
+
+@noindent
+Normally, a note is keyed off after its delay (@pxref{Notes}).
+This can be toggled by the sustain command.
+Notes played after this command will not be keyed off
+until the setting is toggled again.
+
+@node Halt
+@subsection Terminating Playback
+
+@example
+@group
+  7 6 5 4 3 2 1 0
++-----------------+
+| 1 1 1 0 0 0 1 0 |  0xE2
++-----------------+
+@end group
+@end example
+
+@noindent
+Upon reaching a halt command, a channel ceases processing.
+No new notes will be played until the driver is reset.
+@bye

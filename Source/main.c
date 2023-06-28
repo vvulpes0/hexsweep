@@ -39,15 +39,15 @@ main(void)
 #endif
 	set_autoincrement(2);
 	enable_display(0);
-	configure_window();
-	load_palettes();
-	load_tiles(font, font_huffman_table,
-	           font_words, BASE_CHAR);
-	load_tiles(tiles, tiles_huffman_table,
-	           tileset_words, BASE_TILE);
 	if (likely(is_checksum_valid()))
 	{
-		enable_display(1);
+		VREG_write(1,0x24); /* enable vblank but not display */
+		delay(1);
+		configure_window();
+		load_tiles(font, font_huffman_table,
+		           font_words, BASE_CHAR);
+		load_tiles(tiles, tiles_huffman_table,
+		           tileset_words, BASE_TILE);
 		load_driver(sound_driver);
 		load_voice(grand_piano);
 		sound_command(LOAD_VOICE_1);
@@ -58,6 +58,9 @@ main(void)
 		load_song(playground);
 		sound_command(PLAY);
 		enable_cursor();
+		load_palettes();
+		delay(1);
+		enable_display(1);
 		while(1)
 		{
 			clear_planes();
